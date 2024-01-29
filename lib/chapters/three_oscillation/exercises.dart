@@ -225,14 +225,6 @@ class _VehicleSimulationState extends State<VehicleSimulation>
     );
   }
 
-  void _driveHere(PointerEvent event) {
-    final position = Vector(event.localPosition.dx, event.localPosition.dy);
-    final displacement = position - mover!.position;
-    final speed = (displacement / 10).mag();
-
-    mover?.applyForce(displacement.setMag(speed));
-  }
-
   Widget _directionButton(Icon icon, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,

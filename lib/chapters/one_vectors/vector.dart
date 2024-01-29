@@ -14,6 +14,13 @@ class Vector {
         Random().nextDouble(),
       ).normalize();
 
+  static Vector fromOffset(Offset offset) => Vector(offset.dx, offset.dy);
+
+  static Vector fromAngle(double theta) => Vector(cos(theta), sin(theta));
+
+  static Vector fromAngleAndRadius(double theta, double radius) =>
+      Vector.fromAngle(theta) * radius;
+
   Offset offset() {
     return Offset(x.toDouble(), y.toDouble());
   }

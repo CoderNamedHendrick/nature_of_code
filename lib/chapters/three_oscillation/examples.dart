@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:the_nature_of_code/chapters/three_oscillation/mover.dart';
 
@@ -53,6 +55,47 @@ class _BatonOscillationState extends State<BatonOscillation>
   }
 }
 
+class PolarCoordinatesExample extends StatefulWidget {
+  const PolarCoordinatesExample({super.key});
+
+  @override
+  State<PolarCoordinatesExample> createState() =>
+      _PolarCoordinatesExampleState();
+}
+
+class _PolarCoordinatesExampleState extends State<PolarCoordinatesExample>
+    with SingleTickerProviderStateMixin {
+  late AnimationController controller;
+
+  double theta = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    )..repeat();
+
+    controller.addListener(() {
+      setState(() {
+        theta += 0.02;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: PendulumPainter(
+        radius: 80,
+        theta: theta,
+      ),
+      size: MediaQuery.sizeOf(context),
+    );
+  }
+}
+
 class BatonPainter extends CustomPainter {
   final double angle;
 
@@ -95,6 +138,45 @@ class BatonPainter extends CustomPainter {
     if (oldDelegate is! BatonPainter) return false;
 
     if (oldDelegate.angle != angle) return true;
+    return false;
+  }
+}
+
+class PendulumPainter extends CustomPainter {
+  final double radius;
+  final double theta;
+
+  const PendulumPainter({required this.radius, required this.theta});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.translate(size.width / 2, size.height / 2);
+    final x = radius * cos(theta); // CAH => cos(theta) = adjacent/hypotenuse
+    final y = radius * sin(theta); // SOH => sing(theta) = opposite/hypotenuse
+
+    canvas.drawLine(
+      const Offset(0, 0),
+      Offset(x, y),
+      Paint()
+        ..color = Colors.green
+        ..strokeWidth = 3,
+    );
+
+    canvas.drawCircle(
+      Offset(x, y),
+      16,
+      Paint()
+        ..color = Colors.blue
+        ..strokeWidth = 2,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    if (oldDelegate is! PendulumPainter) return false;
+
+    if (oldDelegate.radius != radius) return true;
+    if (oldDelegate.theta != theta) return true;
     return false;
   }
 }
