@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:the_nature_of_code/chapters/two_forces/bodies.dart';
+import 'package:the_nature_of_code/chapters/three_oscillation/oscillation.dart';
 
 const Color darkBlue = Color.fromARGB(255, 18, 32, 47);
 
@@ -28,6 +28,6 @@ class MyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Bodies();
+    return const Oscillation();
   }
 }

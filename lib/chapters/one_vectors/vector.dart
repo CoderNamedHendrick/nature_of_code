@@ -43,6 +43,11 @@ class Vector {
     return newVector * newMag;
   }
 
+  /// returns the angle of the vector in radians
+  double heading() {
+    return atan2(y, x);
+  }
+
   Vector operator +(covariant Vector v) {
     return Vector(x + v.x, y + v.y);
   }

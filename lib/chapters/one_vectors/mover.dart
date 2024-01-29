@@ -8,7 +8,6 @@ class Mover {
   late Vector velocity;
   final Size canvasSize;
   late Vector acceleration;
-  late double topSpeed;
   late double mass;
 
   Mover._(
@@ -16,7 +15,6 @@ class Mover {
     this.velocity,
     this.canvasSize,
     this.acceleration,
-    this.topSpeed,
     this.mass,
   );
 
@@ -28,7 +26,6 @@ class Mover {
     // constant acceleration initialisation
     acceleration = const Vector(0, 0);
 
-    topSpeed = 10;
     mass = 10;
   }
 
@@ -36,7 +33,6 @@ class Mover {
     acceleration = Vector.random();
     acceleration *= (Random().nextDouble() * 4) - 2;
     velocity += acceleration;
-    velocity = velocity.limit(topSpeed);
     position += velocity;
   }
 
@@ -48,7 +44,6 @@ class Mover {
 
   void update() {
     velocity += acceleration;
-    velocity = velocity.limit(topSpeed);
     position += velocity;
 
     acceleration *= 0; // reset acceleration
@@ -79,7 +74,6 @@ class Mover {
     Vector? velocity,
     Size? canvasSize,
     Vector? acceleration,
-    double? topSpeed,
     double? mass,
   }) {
     return Mover._(
@@ -87,7 +81,6 @@ class Mover {
       velocity ?? this.velocity,
       canvasSize ?? this.canvasSize,
       acceleration ?? this.acceleration,
-      topSpeed ?? this.topSpeed,
       mass ?? this.mass,
     );
   }
@@ -98,7 +91,6 @@ class Mover {
       velocity.hashCode ^
       canvasSize.hashCode ^
       acceleration.hashCode ^
-      topSpeed.hashCode ^
       mass.hashCode;
 
   @override
@@ -109,7 +101,6 @@ class Mover {
         velocity == other.velocity &&
         canvasSize == other.canvasSize &&
         acceleration == other.acceleration &&
-        topSpeed == other.topSpeed &&
         mass == other.mass;
   }
 }

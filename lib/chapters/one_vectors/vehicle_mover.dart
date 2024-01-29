@@ -3,11 +3,11 @@ import 'vector.dart';
 
 class VehicleMover extends Mover {
   bool isBreaking = false;
+  late double topSpeed;
   static const Vector _deceleration = Vector(0.01, 0);
 
-  VehicleMover(super.canvasSize, double topSpeed) {
+  VehicleMover(super.canvasSize, this.topSpeed) {
     acceleration = const Vector(0, 0);
-    this.topSpeed = topSpeed;
   }
 
   void brake() {
@@ -25,7 +25,11 @@ class VehicleMover extends Mover {
 
   @override
   void update() {
-    super.update();
+    velocity += acceleration;
+    velocity = velocity.limit(topSpeed);
+    position += velocity;
+
+    acceleration *= 0; // reset acceleration
 
     if (isBreaking && velocity.mag() < 1) {
       velocity = Vector.zero;
