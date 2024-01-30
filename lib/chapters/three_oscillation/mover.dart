@@ -68,6 +68,14 @@ class Mover {
     acceleration *= 0; // reset acceleration
   }
 
+  void thrustUpdate() {
+    velocity += acceleration;
+
+    position += velocity;
+
+    acceleration *= 0; // reset acceleration
+  }
+
   double get bodySize => mass * 2;
 
   void checkEdges() {

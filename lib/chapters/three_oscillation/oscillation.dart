@@ -8,6 +8,6 @@ class Oscillation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const PolarCoordinatesExample();
+    return const SpaceshipAsteroid();
   }
 }

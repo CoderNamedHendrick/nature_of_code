@@ -31,6 +31,7 @@ class Vector {
 
   Vector normalize() {
     final mag = this.mag();
+    if (mag == 0) return Vector.zero;
     if (mag < 0) throw Error.safeToString('Cannot divide by zero or less');
     return this / mag;
   }

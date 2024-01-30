@@ -1,5 +1,9 @@
+import 'dart:math';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:the_nature_of_code/chapters/endless_animation.dart';
 import 'package:the_nature_of_code/chapters/one_vectors/vector.dart';
 import 'package:the_nature_of_code/chapters/three_oscillation/mover.dart';
 
@@ -264,5 +268,232 @@ class _VehicleSimulationState extends State<VehicleSimulation>
         ),
       ),
     );
+  }
+}
+
+class SpaceshipAsteroid extends StatefulWidget {
+  const SpaceshipAsteroid({super.key});
+
+  @override
+  State<SpaceshipAsteroid> createState() => _SpaceshipAsteroidState();
+}
+
+class _SpaceshipAsteroidState extends State<SpaceshipAsteroid> {
+  final focus = FocusNode();
+
+  Mover? mover;
+
+  @override
+  void dispose() {
+    focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyboardListener(
+      focusNode: focus,
+      autofocus: true,
+      onKeyEvent: (event) {
+        // rotate counter clockwise
+        if (mover != null) {
+          if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+            mover?.angle = (mover?.angle ?? 0) - 0.1;
+          } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+            mover?.angle = (mover?.angle ?? 0) + 0.1;
+          } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+            // decelerate ship
+            Vector deceleration = mover!.velocity.copyWith() * -1;
+            deceleration = deceleration;
+
+            mover?.applyForce(deceleration);
+          } else if (event.logicalKey.keyLabel == 'Z') {
+            // apply force in direction of angle
+            final thrust =
+                Vector.fromAngle(-pi / 2 + (mover?.angle ?? 0)).setMag(0.5);
+            mover?.applyForce(thrust);
+          }
+        }
+      },
+      child: LayoutBuilder(builder: (context, constraints) {
+        mover ??= Mover(constraints.biggest)
+          ..position =
+              Vector(constraints.maxWidth * 0.5, constraints.maxHeight * 0.5)
+          ..mass = 20;
+
+        return EndlessAnimation(
+          onAnimate: () {
+            setState(() {
+              if (mover != null) {
+                mover?.bounceEdges();
+                mover?.applyFriction();
+                mover?.thrustUpdate();
+              }
+            });
+          },
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Positioned.fill(
+              //   child: CustomPaint(
+              //     painter: AsteroidPainter(),
+              //   ),
+              // ),
+              Positioned(
+                top: mover?.position.y.toDouble(),
+                left: mover?.position.x.toDouble(),
+                height: mover?.bodySize,
+                width: mover?.bodySize,
+                child: CustomPaint(
+                  painter: SpaceshipPainter(
+                    mover?.angle ?? 0,
+                    mover?.bodySize ?? 0,
+                  ),
+                  size: Size(mover?.bodySize ?? 0, mover?.bodySize ?? 0),
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class SpaceshipPainter extends CustomPainter {
+  const SpaceshipPainter(this.angle, this.spaceshipSize);
+
+  final double angle;
+  final double spaceshipSize;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.translate(size.width / 2, size.height / 2);
+    canvas.rotate(angle);
+
+    final path = Path();
+
+    const position = Vector(0, 0);
+    path.moveTo(
+      position.x.toDouble(),
+      position.y.toDouble() - spaceshipSize / 2,
+    );
+
+    final topVertex = Vector(0, -spaceshipSize / 2);
+    final leftVertex = Vector(-spaceshipSize / 2, spaceshipSize / 2);
+    final rightVertex = Vector(spaceshipSize / 2, spaceshipSize / 2);
+
+    // plan body
+    path.addPolygon([
+      topVertex.offset(),
+      leftVertex.offset(),
+      rightVertex.offset(),
+    ], true);
+
+    // first ship exhaust
+    path.addRect(
+      Rect.fromCenter(
+        center: leftVertex.offset() + const Offset(10, 1),
+        width: 5,
+        height: 5,
+      ),
+    );
+
+    // second ship exhaust
+    path.addRect(
+      Rect.fromCenter(
+        center: rightVertex.offset() + const Offset(-10, 1),
+        width: 5,
+        height: 5,
+      ),
+    );
+
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = Colors.green
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    if (oldDelegate is! SpaceshipPainter) return false;
+
+    if (oldDelegate.angle != angle) return true;
+    if (oldDelegate.spaceshipSize != spaceshipSize) return true;
+    return false;
+  }
+}
+
+class EndlessSpiral extends StatefulWidget {
+  const EndlessSpiral({super.key});
+
+  @override
+  State<EndlessSpiral> createState() => _EndlessSpiralState();
+}
+
+class _EndlessSpiralState extends State<EndlessSpiral> {
+  double theta = 0;
+  double radius = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return EndlessAnimation(
+      onAnimate: () {
+        setState(() {
+          theta += radiusIncrement;
+          radius += thetaIncrement;
+        });
+      },
+      child: CustomPaint(
+        painter: SpiralPainter(radius: radius, theta: theta),
+        size: MediaQuery.sizeOf(context),
+      ),
+    );
+  }
+}
+
+const radiusIncrement = 0.2;
+const thetaIncrement = 0.05;
+
+class SpiralPainter extends CustomPainter {
+  final double theta;
+  final double radius;
+
+  const SpiralPainter({required this.radius, required this.theta});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.translate(size.width / 2, size.height / 2);
+
+    Path path = Path();
+
+    // compute previous points
+    for (double i = 0; i <= radius; i += radiusIncrement) {
+      final index = (i / radiusIncrement).floor();
+      final x = i * cos(index * thetaIncrement);
+      final y = i * sin(index * thetaIncrement);
+
+      path.lineTo(x, y);
+    }
+
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = Colors.orange
+        ..strokeWidth = 5
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    if (oldDelegate is! SpiralPainter) return false;
+
+    if (oldDelegate.radius != radius) return true;
+    if (oldDelegate.theta != theta) return true;
+    return false;
   }
 }
